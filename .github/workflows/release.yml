@@ -32,23 +32,51 @@ jobs:
       run: |
         sed -i "s/versionName \".*\"/versionName \"${{ steps.get_version.outputs.VERSION }}\"/" app/build.gradle
         
-    - name: Build Release APK
-      run: ./gradlew assembleRelease --stacktrace
-      
-    - name: Sign APK (if keystore is configured)
-      if: ${{ secrets.KEYSTORE_FILE != '' }}
+    - name: Check if keystore exists
+      id: check_keystore
+      run: |
+        if [ -n "${{ secrets.KEYSTORE_FILE }}" ]; then
+          echo "has_keystore=true" >> $GITHUB_OUTPUT
+          echo "✅ キーストアが設定されています - 署名付きAPKをビルドします"
+        else
+          echo "has_keystore=false" >> $GITHUB_OUTPUT
+          echo "⚠️ キーストアが未設定 - 未署名APKをビルドします"
+        fi
+        
+    - name: Setup Keystore (if available)
+      if: steps.check_keystore.outputs.has_keystore == 'true'
       run: |
         echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > release.keystore
+        echo "KEYSTORE_PATH=../release.keystore" >> $GITHUB_ENV
+        
+    - name: Build Signed Release APK
+      if: steps.check_keystore.outputs.has_keystore == 'true'
+      run: |
         ./gradlew assembleRelease \
-          -Pandroid.injected.signing.store.file=../release.keystore \
+          -Pandroid.injected.signing.store.file=${{ env.KEYSTORE_PATH }} \
           -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
           -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
-          -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+          -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }} \
+          --stacktrace
+        echo "✅ 署名付きAPKのビルドが完了しました"
+        
+    - name: Build Unsigned Release APK
+      if: steps.check_keystore.outputs.has_keystore == 'false'
+      run: |
+        ./gradlew assembleRelease --stacktrace
+        echo "✅ 未署名APKのビルドが完了しました"
       
     - name: Rename APK
       run: |
         mkdir -p release
-        cp app/build/outputs/apk/release/app-release*.apk release/NotesApp-${{ steps.get_version.outputs.VERSION }}.apk
+        if [ "${{ steps.check_keystore.outputs.has_keystore }}" == "true" ]; then
+          cp app/build/outputs/apk/release/app-release.apk release/NotesApp-${{ steps.get_version.outputs.VERSION }}-signed.apk
+          echo "📦 APKファイル名: NotesApp-${{ steps.get_version.outputs.VERSION }}-signed.apk"
+        else
+          cp app/build/outputs/apk/release/app-release-unsigned.apk release/NotesApp-${{ steps.get_version.outputs.VERSION }}-unsigned.apk 2>/dev/null || \
+          cp app/build/outputs/apk/release/app-release.apk release/NotesApp-${{ steps.get_version.outputs.VERSION }}-unsigned.apk
+          echo "📦 APKファイル名: NotesApp-${{ steps.get_version.outputs.VERSION }}-unsigned.apk"
+        fi
         
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -57,15 +85,26 @@ jobs:
         body: |
           ## NotesApp v${{ steps.get_version.outputs.VERSION }}
           
+          ### 📦 ビルド情報
+          ${{ steps.check_keystore.outputs.has_keystore == 'true' && '✅ 署名付きAPK' || '⚠️ 未署名APK（開発用）' }}
+          
           ### 新機能
           - リリースノートをここに記入
           
           ### ダウンロード
           APKファイルをダウンロードしてインストールしてください。
+          ${{ steps.check_keystore.outputs.has_keystore == 'false' && '
+          
+          ⚠️ **注意**: このAPKは未署名です。インストール時に「提供元不明のアプリ」の許可が必要です。' || '' }}
           
           ### 動作環境
           - Android 8.0 (API 26) 以上
           - OPPO/OnePlus デバイスで最適化
+          
+          ### インストール方法
+          1. APKファイルをダウンロード
+          2. デバイスの「設定」>「セキュリティ」で「提供元不明のアプリ」を許可
+          3. APKファイルをタップしてインストール
         draft: false
         prerelease: false
       env:
