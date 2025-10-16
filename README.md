@@ -63,6 +63,7 @@ NotesApp/
 
 ### 必要要件
 - Android Studio Arctic Fox 以降
+- **JDK 17** 以降（重要！）
 - Android SDK 26 (Android 8.0) 以上
 - Gradle 8.0 以降
 

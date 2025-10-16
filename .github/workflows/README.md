@@ -123,6 +123,13 @@ git push origin v1.0.0
 ```
 → このステップが実行されているか確認
 
+**Java バージョンの確認**
+```bash
+# ローカル環境で Java 17 が必要です
+java -version
+# java version "17.x.x" が表示されることを確認
+```
+
 **Gradle キャッシュのクリア**
 ```bash
 # ローカルでビルドしてキャッシュを再生成

@@ -14,9 +14,11 @@
 
 ### ソフトウェア
 - **Android Studio**: Arctic Fox (2020.3.1) 以降
-- **JDK**: Java 11 以降
+- **JDK**: Java 17 以降（**必須**）
 - **Android SDK**: API Level 26 以上
 - **Gradle**: 8.0 以降（Android Studio に含まれる）
+
+> ⚠️ **重要**: Android Gradle Plugin 8.2 は Java 17 が必須です。Java 11 では動作しません。
 
 ### ハードウェア
 - **開発用PC**: 
@@ -28,14 +30,53 @@
 
 ## 開発環境のセットアップ
 
-### 1. Android Studio のインストール
+### 1. JDK 17 のインストール
+
+**Android Studio を使用する場合:**
+- Android Studio には JDK 17 が同梱されています
+- Settings > Build, Execution, Deployment > Build Tools > Gradle
+- Gradle JDK で「Embedded JDK (17)」を選択
+
+**コマンドラインでビルドする場合:**
+
+**Windows:**
+```powershell
+# Chocolatey を使用
+choco install openjdk17
+
+# または手動で https://adoptium.net/ からダウンロード
+```
+
+**Mac:**
+```bash
+# Homebrew を使用
+brew install openjdk@17
+
+# パスを設定
+echo 'export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**Linux:**
+```bash
+sudo apt update
+sudo apt install openjdk-17-jdk
+```
+
+**確認:**
+```bash
+java -version
+# openjdk version "17.x.x" と表示されることを確認
+```
+
+### 2. Android Studio のインストール
 
 1. [Android Studio 公式サイト](https://developer.android.com/studio)からダウンロード
 2. インストーラーを実行
 3. セットアップウィザードに従ってインストール
 4. 初回起動時に必要なSDKコンポーネントをダウンロード
 
-### 2. Android SDK の設定
+### 3. Android SDK の設定
 
 Android Studio で以下をインストール：
 
@@ -52,7 +93,7 @@ Tools > SDK Manager
 ✓ Android Emulator
 ```
 
-### 3. デバイスの設定
+### 4. デバイスの設定
 
 #### 実機を使用する場合
 
