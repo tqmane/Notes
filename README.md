@@ -204,6 +204,19 @@ base64 -w 0 notesapp.keystore
 - **署名付き**: `NotesApp-1.0.0-signed.apk` ✅
 - **未署名**: `NotesApp-1.0.0-unsigned.apk` ⚠️
 
+## 📥 APKのインストール
+
+### 最も簡単な方法
+
+1. [GitHub Actions](https://github.com/tqmane/Notes/actions) から **デバッグAPK** をダウンロード
+2. デバイスに転送してインストール
+
+詳細は [QUICK_INSTALL.md](QUICK_INSTALL.md) を参照してください。
+
+### トラブルシューティング
+
+「パッケージが無効」エラーが出る場合は [APK_INSTALL_GUIDE.md](APK_INSTALL_GUIDE.md) を参照してください。
+
 ## 📱 使い方
 
 ### ノートの作成
