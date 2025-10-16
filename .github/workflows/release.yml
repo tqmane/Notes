@@ -26,11 +26,22 @@ jobs:
       
     - name: Extract version from tag
       id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      run: |
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "✅ バージョン: ${VERSION}"
+        else
+          VERSION="dev-${GITHUB_SHA:0:7}"
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "⚠️ タグではありません。開発バージョン: ${VERSION}"
+        fi
       
     - name: Update version in build.gradle
       run: |
-        sed -i "s/versionName \".*\"/versionName \"${{ steps.get_version.outputs.VERSION }}\"/" app/build.gradle
+        VERSION="${{ steps.get_version.outputs.VERSION }}"
+        sed -i "s|versionName \".*\"|versionName \"${VERSION}\"|" app/build.gradle
+        echo "✅ build.gradle のバージョンを ${VERSION} に更新しました"
         
     - name: Check if keystore exists
       id: check_keystore
