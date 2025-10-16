@@ -188,7 +188,7 @@ schedule:
 
 ```yaml
 - name: Upload Debug APK
-  uses: actions/upload-artifact@v3
+  uses: actions/upload-artifact@v4
   with:
     retention-days: 30  # 30日 → 任意の日数に変更
 ```
