@@ -1,0 +1,73 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+        
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Extract version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+    - name: Update version in build.gradle
+      run: |
+        sed -i "s/versionName \".*\"/versionName \"${{ steps.get_version.outputs.VERSION }}\"/" app/build.gradle
+        
+    - name: Build Release APK
+      run: ./gradlew assembleRelease --stacktrace
+      
+    - name: Sign APK (if keystore is configured)
+      if: ${{ secrets.KEYSTORE_FILE != '' }}
+      run: |
+        echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > release.keystore
+        ./gradlew assembleRelease \
+          -Pandroid.injected.signing.store.file=../release.keystore \
+          -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+          -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+          -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+      
+    - name: Rename APK
+      run: |
+        mkdir -p release
+        cp app/build/outputs/apk/release/app-release*.apk release/NotesApp-${{ steps.get_version.outputs.VERSION }}.apk
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release/*.apk
+        body: |
+          ## NotesApp v${{ steps.get_version.outputs.VERSION }}
+          
+          ### 新機能
+          - リリースノートをここに記入
+          
+          ### ダウンロード
+          APKファイルをダウンロードしてインストールしてください。
+          
+          ### 動作環境
+          - Android 8.0 (API 26) 以上
+          - OPPO/OnePlus デバイスで最適化
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

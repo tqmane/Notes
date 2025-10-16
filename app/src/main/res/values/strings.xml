@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NotesApp</string>
+    
+    <!-- Main Activity -->
+    <string name="new_note">新規ノート</string>
+    <string name="delete_note">ノートを削除</string>
+    <string name="about">アプリについて</string>
+    
+    <!-- Drawing Activity -->
+    <string name="undo">元に戻す</string>
+    <string name="clear">クリア</string>
+    <string name="color">色</string>
+    <string name="stroke_width">線の太さ</string>
+    <string name="save">保存</string>
+    <string name="rename">名前変更</string>
+    <string name="stylus_ready">スタイラス準備完了</string>
+    
+    <!-- Note Item -->
+    <string name="note_thumbnail">ノートサムネイル</string>
+    <string name="note_title">ノートタイトル</string>
+    <string name="note_date">更新日時</string>
+</resources>
