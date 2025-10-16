@@ -83,10 +83,37 @@ cd Notes
 - Android Studio が自動的に依存関係をダウンロード
 - エラーが出た場合は "File > Sync Project with Gradle Files" を実行
 
-4. **ビルド＆実行**
+4. **Gradle Wrapper のセットアップ**
+
+GitHub Actions でビルドするには、`gradle-wrapper.jar` が必要です。
+
+**自動セットアップ（Windows）:**
+```batch
+setup-gradle-wrapper.bat
+```
+
+**手動セットアップ:**
+```bash
+# Windows (PowerShell)
+Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar' -OutFile 'gradle/wrapper/gradle-wrapper.jar'
+
+# Mac/Linux
+curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar
+```
+
+**確認:**
+```bash
+.\gradlew.bat --version  # Windows
+./gradlew --version      # Mac/Linux
+```
+
+詳細は [SETUP_GRADLE.md](SETUP_GRADLE.md) を参照してください。
+
+5. **ビルド＆実行**
 ```bash
 # コマンドラインから
-./gradlew assembleDebug
+.\gradlew.bat assembleDebug  # Windows
+./gradlew assembleDebug      # Mac/Linux
 
 # または Android Studio で
 Run > Run 'app'
